@@ -1,4 +1,4 @@
-const CACHE="roman-ai-v1-cache";
+const CACHE="roman-ai-cache-v2";
 const FILES=["./","./index.html","./manifest.webmanifest","./icon.svg"];
 self.addEventListener("install",e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES))));
 self.addEventListener("fetch",e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));
