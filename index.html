@@ -25,11 +25,11 @@ button{cursor:pointer;font:inherit}.primary,.secondary,.danger{border:0;border-r
 </style>
 </head>
 <body>
-<header><div class="brand"><div><strong>ROMAN AI</strong><small>BUSINESS COMMAND CENTER</small></div><span class="pill">V1.0 · LOCAL MODE</span></div></header>
+<header><div class="brand"><div><strong>ROMAN AI</strong><small>BUSINESS COMMAND CENTER</small></div><span class="pill">V2.0 · OWNER-APPROVED</span></div></header>
 <main>
 <section class="hero">
  <div class="eyebrow">PROJECT ROMAN AI</div><h1>Build your brand.<br>Run your workflow.</h1>
- <div class="muted">A simple command center for clothing-brand copywriting. Your data stays in this browser on this device.</div>
+ <div class="muted">A command center for clothing-brand copywriting, brand research, and owner-approved sales drafts. Records are stored in this browser on this device.</div>
 </section>
 <div class="stats">
  <div class="stat"><span>Prospects</span><b id="statProspects">0</b></div>
@@ -38,7 +38,7 @@ button{cursor:pointer;font:inherit}.primary,.secondary,.danger{border:0;border-r
  <div class="stat"><span>Pending approvals</span><b id="statApprovals">0</b></div>
 </div>
 <nav id="nav">
- <button class="active" data-tab="home">Overview</button><button data-tab="captions">Caption studio</button><button data-tab="prospects">Prospects</button><button data-tab="orders">Orders</button><button data-tab="approvals">Approvals</button>
+ <button class="active" data-tab="home">Overview</button><button data-tab="captions">Caption studio</button><button data-tab="brandlab">Brand lab</button><button data-tab="prospects">Prospects</button><button data-tab="sales">Sales inbox</button><button data-tab="orders">Orders</button><button data-tab="approvals">Approvals</button>
 </nav>
 <section id="home" class="tab">
  <h2>Command overview</h2>
@@ -46,8 +46,8 @@ button{cursor:pointer;font:inherit}.primary,.secondary,.danger{border:0;border-r
   <div class="card"><h3>Today's focus</h3><p class="muted">1. Create a tailored sample.<br>2. Add a genuine prospect.<br>3. Prepare a pitch for review.<br>4. Record orders and verified payments.</p></div>
   <div class="card"><h3>Business offer</h3><p><b>5 custom captions · $10</b></p><p class="muted">Introductory package for clothing brands. Agree on scope and delivery time before starting.</p></div>
  </div>
- <div class="notice">This version does not scrape Instagram, send DMs, collect payments, or call a paid AI API. It creates drafts and tracks your work. You approve and perform external actions yourself.</div>
- <div class="card"><h3>Quick start</h3><div class="actions"><button class="primary" onclick="showTab('captions')">Create captions</button><button class="secondary" onclick="showTab('prospects')">Add prospect</button></div></div>
+ <div class="notice">V2 does not scrape Instagram, send DMs, collect payments, or connect to a live AI API. Brand analysis uses details you provide; message drafts stay in your approval inbox. You approve and perform external actions yourself.</div>
+ <div class="card"><h3>Quick start</h3><div class="actions"><button class="primary" onclick="showTab('brandlab')">Analyze a brand</button><button class="secondary" onclick="showTab('sales')">Draft a sales message</button></div><div class="actions"><button class="secondary" onclick="exportBackup()">Export backup</button><button class="secondary" onclick="document.getElementById('backupFile').click()">Import backup</button><input id="backupFile" type="file" accept="application/json,.json" class="hidden" onchange="importBackup(event)"></div><p class="muted">Keep a backup when changing devices or browsers. Cloud sync is not connected yet.</p></div>
 </section>
 <section id="captions" class="tab hidden">
  <h2>Caption studio</h2><p class="muted">Generate editable starter drafts from your client's details. Always verify product claims before delivery.</p>
@@ -60,6 +60,28 @@ button{cursor:pointer;font:inherit}.primary,.secondary,.danger{border:0;border-r
  </div>
  <div id="captionOutput" class="card hidden" style="margin-top:12px"><div class="itemtop"><h3>Draft portfolio</h3><span class="tag">Not sent</span></div><div id="captionsList"></div><div class="actions"><button class="secondary" onclick="copyCaptions()">Copy all</button><button class="primary" onclick="saveApproval()">Send to approvals</button></div></div>
 </section>
+
+<section id="brandlab" class="tab hidden">
+ <h2>Brand lab</h2>
+ <p class="muted">Analyze information supplied by the brand or copied from its public profile. Roman AI does not open or scrape Instagram links.</p>
+ <div class="card">
+  <div class="field"><label>Brand name</label><input id="bName" placeholder="e.g. Northside Supply"></div>
+  <div class="field"><label>Instagram profile or website link (reference only)</label><input id="bLink" placeholder="https://instagram.com/brand"></div>
+  <div class="field"><label>What does the brand sell?</label><textarea id="bProducts" placeholder="Products, collection, materials, fit, price range..."></textarea></div>
+  <div class="field"><label>Who does the brand seem to serve?</label><textarea id="bAudience" placeholder="Describe the intended customer, if known."></textarea></div>
+  <div class="field"><label>Profile / product details supplied by the customer</label><textarea id="bEvidence" placeholder="Paste bio text, product descriptions, post details, and verified facts."></textarea></div>
+  <div class="field"><label>Brand tone</label><select id="bTone"><option>Professional and catchy</option><option>Minimal and premium</option><option>Bold and energetic</option><option>Friendly and casual</option><option>Streetwear and confident</option></select></div>
+  <button class="primary" style="width:100%" onclick="analyzeBrand()">Analyze supplied details</button>
+ </div>
+ <div id="brandResult" class="card hidden" style="margin-top:12px">
+  <div class="itemtop"><h3>Brand analysis</h3><span class="tag">Based on supplied details</span></div>
+  <div id="brandAnalysis"></div>
+  <div class="actions"><button class="secondary" onclick="copyBrandAnalysis()">Copy analysis</button><button class="primary" onclick="saveBrand()">Save brand brief</button></div>
+ </div>
+ <div class="card" style="margin-top:12px"><h3>Saved brand briefs</h3><div id="brandList"></div></div>
+ <div class="notice">This is a structured first-pass analysis, not a live AI model or a verified review of the linked profile. Treat audience descriptions and positioning ideas as hypotheses until confirmed.</div>
+</section>
+
 <section id="prospects" class="tab hidden">
  <h2>Prospect tracker</h2>
  <div class="card">
@@ -70,6 +92,22 @@ button{cursor:pointer;font:inherit}.primary,.secondary,.danger{border:0;border-r
  </div>
  <div class="card" style="margin-top:12px"><h3>Saved prospects</h3><div id="prospectList"></div></div>
 </section>
+
+<section id="sales" class="tab hidden">
+ <h2>Sales message inbox</h2>
+ <p class="muted">Create personalized outreach drafts from public business details. Nothing is sent automatically.</p>
+ <div class="card">
+  <div class="field"><label>Brand / business name</label><input id="sBrand" placeholder="Brand name"></div>
+  <div class="field"><label>Public Instagram handle or contact</label><input id="sHandle" placeholder="@brand"></div>
+  <div class="field"><label>Specific public detail you noticed</label><textarea id="sObservation" placeholder="e.g. They posted a new hoodie collection yesterday. Be accurate and specific."></textarea></div>
+  <div class="field"><label>Offer</label><select id="sOffer"><option>5 custom captions for $10</option><option>10 custom captions for $18</option><option>20 custom captions for $30</option><option>One free sample caption</option></select></div>
+  <div class="field"><label>Message style</label><select id="sStyle"><option>Professional and friendly</option><option>Short and direct</option><option>Confident and energetic</option></select></div>
+  <button class="primary" style="width:100%" onclick="createSalesDraft()">Create message draft</button>
+ </div>
+ <div class="card" style="margin-top:12px"><h3>Messages awaiting your review</h3><div id="salesList"></div></div>
+ <div class="notice">Review the recipient, personalization, and offer before copying. Contact businesses respectfully, follow platform rules, and avoid repeated or bulk unsolicited messages.</div>
+</section>
+
 <section id="orders" class="tab hidden">
  <h2>Order manager</h2>
  <div class="card">
@@ -88,10 +126,19 @@ button{cursor:pointer;font:inherit}.primary,.secondary,.danger{border:0;border-r
 </main>
 <div class="bottom">ROMAN AI · YOUR APPROVAL REQUIRED FOR CUSTOMER CONTACT AND PAYMENT ACTIONS</div>
 <script>
-const KEY='roman-ai-v1';
+const KEY='roman-ai-v2';
+const OLD_KEY='roman-ai-v1';
 let data=load();
 let currentDraft='';
-function load(){try{return JSON.parse(localStorage.getItem(KEY))||{prospects:[],orders:[],approvals:[]}}catch(e){return {prospects:[],orders:[],approvals:[]}}}
+function load(){
+ try{
+  const current=localStorage.getItem(KEY);
+  if(current){const d=JSON.parse(current);return {...d,prospects:d.prospects||[],orders:d.orders||[],approvals:d.approvals||[],brands:d.brands||[],sales:d.sales||[]}}
+  const old=localStorage.getItem(OLD_KEY);
+  if(old){const d=JSON.parse(old);return {...d,prospects:d.prospects||[],orders:d.orders||[],approvals:d.approvals||[],brands:[],sales:[]}}
+ }catch(e){}
+ return {prospects:[],orders:[],approvals:[],brands:[],sales:[]}
+}
 function save(){localStorage.setItem(KEY,JSON.stringify(data));render()}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function showTab(t){document.querySelectorAll('.tab').forEach(x=>x.classList.add('hidden'));document.getElementById(t).classList.remove('hidden');document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));}
@@ -120,6 +167,91 @@ function saveApproval(){if(!currentDraft){alert('Generate captions first.');retu
 function addProspect(){let n=pName.value.trim();if(!n){alert('Enter a brand name.');return}data.prospects.unshift({id:Date.now(),name:n,handle:pHandle.value.trim(),note:pNote.value.trim(),status:'Researching'});pName.value=pHandle.value=pNote.value='';save()}
 function addOrder(){let c=oClient.value.trim();if(!c){alert('Enter a client name.');return}data.orders.unshift({id:Date.now(),client:c,price:Number(oPackage.value),status:oStatus.value,paid:oPaid.value==='yes'});oClient.value='';save()}
 function deleteItem(group,id){if(!confirm('Delete this record?'))return;data[group]=data[group].filter(x=>x.id!==id);save()}
+
+let currentBrandAnalysis='';
+function analyzeBrand(){
+ const name=document.getElementById('bName').value.trim(), link=document.getElementById('bLink').value.trim();
+ const products=document.getElementById('bProducts').value.trim(), audience=document.getElementById('bAudience').value.trim();
+ const evidence=document.getElementById('bEvidence').value.trim(), tone=document.getElementById('bTone').value;
+ if(!name && !products && !evidence){alert('Add a brand name or some brand details first.');return}
+ const facts=[products,evidence].filter(Boolean).join('\n\n');
+ const missing=[];
+ if(!products)missing.push('Specific products or services');
+ if(!audience)missing.push('Target customer / audience');
+ if(!evidence)missing.push('Profile bio, product descriptions, or example posts');
+ currentBrandAnalysis=`BRAND: ${name||'Not provided'}
+REFERENCE LINK: ${link||'Not provided'}
+BRAND TONE: ${tone}
+
+WHAT IS KNOWN
+${facts||'No product or profile details supplied.'}
+
+POSSIBLE POSITIONING
+${products?'Build messaging around the products and benefits explicitly described above.':'Ask the brand for its main products and strongest customer benefit before writing specific claims.'}
+${audience?'Intended audience supplied: '+audience:'Audience is not confirmed. Treat any customer profile as a hypothesis, not a fact.'}
+
+CONTENT ANGLES TO TEST
+1. Show how the product fits into a customer's everyday use.
+2. Highlight only confirmed design, material, fit, or availability details.
+3. Use the brand tone (${tone}) consistently.
+4. Ask a simple question or invite customers to explore the collection.
+
+INFORMATION STILL NEEDED
+${missing.length?missing.map(x=>'• '+x).join('\n'):'• Confirm which product claims and launch details are approved for public use.'}
+
+CLAIM CHECK
+Do not invent material quality, durability, shipping speed, discounts, scarcity, customer reviews, or launch dates. Verify every factual claim with the brand.`;
+ document.getElementById('brandAnalysis').innerHTML='<div class="caption">'+esc(currentBrandAnalysis)+'</div>';
+ document.getElementById('brandResult').classList.remove('hidden');
+}
+async function copyBrandAnalysis(){
+ if(!currentBrandAnalysis)return;
+ try{await navigator.clipboard.writeText(currentBrandAnalysis);alert('Brand analysis copied.')}
+ catch(e){alert('Copy is unavailable here. Select the analysis manually.')}
+}
+function saveBrand(){
+ if(!currentBrandAnalysis){alert('Analyze a brand first.');return}
+ data.brands.unshift({id:Date.now(),name:document.getElementById('bName').value.trim()||'Unnamed brand',link:document.getElementById('bLink').value.trim(),products:document.getElementById('bProducts').value.trim(),audience:document.getElementById('bAudience').value.trim(),evidence:document.getElementById('bEvidence').value.trim(),tone:document.getElementById('bTone').value,analysis:currentBrandAnalysis,created:new Date().toLocaleString()});
+ save();alert('Brand brief saved.');
+}
+function createSalesDraft(){
+ const brand=document.getElementById('sBrand').value.trim(),handle=document.getElementById('sHandle').value.trim();
+ const observation=document.getElementById('sObservation').value.trim(),offer=document.getElementById('sOffer').value,style=document.getElementById('sStyle').value;
+ if(!brand || !observation){alert('Enter the brand name and one specific public detail you noticed.');return}
+ const opener=style==='Short and direct'?'Hi':style==='Confident and energetic'?'Hey':'Hello';
+ let body=`${opener} ${brand}${handle?' ('+handle+')':''} — I noticed ${observation.replace(/[.\\s]+$/,'')}.`;
+ if(style==='Short and direct') body+=` I run Roman Captions and write Instagram captions for clothing brands. My current offer is ${offer}. Would you be open to seeing a sample?`;
+ else if(style==='Confident and energetic') body+=` I run Roman Captions, where I help clothing brands make their posts sound more distinctive. I'm offering ${offer}. I can put together a sample so you can see the style first. Interested?`;
+ else body+=` I run Roman Captions, a small copywriting service creating professional, catchy Instagram captions for clothing brands. I'm currently offering ${offer}. If you'd like, I can create a sample based on one of your posts so you can see my writing style. Would you be interested?`;
+ data.sales.unshift({id:Date.now(),brand,handle,observation,offer,body,status:'Needs review',created:new Date().toLocaleString()});
+ document.getElementById('sBrand').value=document.getElementById('sHandle').value=document.getElementById('sObservation').value='';
+ save();
+}
+async function copySales(id){
+ const x=data.sales.find(x=>x.id===id);if(!x)return;
+ try{await navigator.clipboard.writeText(x.body);alert('Message copied. It has not been sent.')}
+ catch(e){alert('Copy unavailable. Open the draft and select the text manually.')}
+}
+function markSalesReviewed(id){const x=data.sales.find(x=>x.id===id);if(x){x.status='Reviewed by owner';save()}}
+function exportBackup(){
+ const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+ const url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download='roman-ai-backup-'+new Date().toISOString().slice(0,10)+'.json';
+ document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+}
+function importBackup(event){
+ const file=event.target.files&&event.target.files[0];if(!file)return;
+ const reader=new FileReader();
+ reader.onload=()=>{try{
+  const incoming=JSON.parse(reader.result);
+  if(!incoming || !Array.isArray(incoming.prospects)||!Array.isArray(incoming.orders)||!Array.isArray(incoming.approvals))throw new Error('Invalid backup');
+  if(!confirm('Import this backup and replace the records currently stored in this browser? Export a backup first if you want to keep both.'))return;
+  data={prospects:incoming.prospects,orders:incoming.orders,approvals:incoming.approvals,brands:Array.isArray(incoming.brands)?incoming.brands:[],sales:Array.isArray(incoming.sales)?incoming.sales:[]};
+  save();alert('Backup imported.');
+ }catch(e){alert('That file does not look like a valid Roman AI backup.');}};
+ reader.readAsText(file);event.target.value='';
+}
+
 function render(){
  statProspects.textContent=data.prospects.length;statOrders.textContent=data.orders.length;
  statRevenue.textContent='$'+data.orders.filter(x=>x.paid).reduce((s,x)=>s+x.price,0);
@@ -127,6 +259,8 @@ function render(){
  prospectList.innerHTML=data.prospects.length?data.prospects.map(x=>`<div class="item"><div class="itemtop"><b>${esc(x.name)}</b><span class="tag">${esc(x.status)}</span></div><div class="muted">${esc(x.handle)} · ${esc(x.note)}</div><div class="actions"><button class="secondary" onclick="deleteItem('prospects',${x.id})">Delete</button></div></div>`).join(''):'<div class="empty">No prospects saved yet.</div>';
  orderList.innerHTML=data.orders.length?data.orders.map(x=>`<div class="item"><div class="itemtop"><b>${esc(x.client)}</b><b>$${x.price}</b></div><div class="muted">${esc(x.status)} · ${x.paid?'Payment verified':'Unpaid'}</div><div class="actions"><button class="secondary" onclick="togglePaid(${x.id})">${x.paid?'Mark unpaid':'Mark paid (only after verification)'}</button><button class="secondary" onclick="deleteItem('orders',${x.id})">Delete</button></div></div>`).join(''):'<div class="empty">No orders yet.</div>';
  approvalList.innerHTML=data.approvals.length?data.approvals.map(x=>`<div class="item"><div class="itemtop"><b>${esc(x.title)}</b><span class="tag">${esc(x.status)}</span></div><div class="muted">${esc(x.created)}</div><details><summary>Review draft</summary><div class="caption">${esc(x.body)}</div></details><div class="actions"><button class="secondary" onclick="copyApproval(${x.id})">Copy</button><button class="primary" onclick="approve(${x.id})">Mark reviewed</button><button class="danger" onclick="deleteItem('approvals',${x.id})">Delete</button></div></div>`).join(''):'<div class="empty">Nothing waiting for review.</div>';
+ brandList.innerHTML=data.brands.length?data.brands.map(x=>`<div class="item"><div class="itemtop"><b>${esc(x.name)}</b><span class="tag">${esc(x.created)}</span></div><div class="muted">${esc(x.link)}</div><details><summary>Open saved analysis</summary><div class="caption">${esc(x.analysis)}</div></details><div class="actions"><button class="secondary" onclick="deleteItem('brands',${x.id})">Delete brief</button></div></div>`).join(''):'<div class="empty">No brand briefs saved yet.</div>';
+ salesList.innerHTML=data.sales.length?data.sales.map(x=>`<div class="item"><div class="itemtop"><b>${esc(x.brand)}</b><span class="tag">${esc(x.status)}</span></div><div class="muted">${esc(x.handle)} · ${esc(x.created)}</div><details open><summary>Review message</summary><div class="caption">${esc(x.body)}</div></details><div class="actions"><button class="secondary" onclick="copySales(${x.id})">Copy draft</button><button class="primary" onclick="markSalesReviewed(${x.id})">Mark reviewed</button><button class="danger" onclick="deleteItem('sales',${x.id})">Delete</button></div></div>`).join(''):'<div class="empty">No sales messages drafted yet.</div>';
 }
 function togglePaid(id){let x=data.orders.find(x=>x.id===id);if(!x)return;if(!x.paid&&!confirm('Confirm you have checked your actual payment account and verified the payment?'))return;x.paid=!x.paid;save()}
 function approve(id){let x=data.approvals.find(x=>x.id===id);if(x){x.status='Reviewed by owner';save()}}
