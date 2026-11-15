@@ -1,20 +1,84 @@
-ROMAN AI
-Your semi-autonomous business workspace · You approve important actions.
-Overview
-Brand Lab
-Sales Inbox
-Prospects
-Orders
-Mission control
-Plan outreach, organize brand details, draft messages, and track orders. Nothing is sent or charged automatically.
-Prospects
-0
-Orders
-0
-How this version works
-Brand Lab and Sales Inbox create drafts from information you enter. The Instagram link is stored as a reference only; this app does not fetch or scrape profiles, send DMs, process payments, or connect to a live AI model.
-Backup
-Export or restore this app's saved records on this device.
-Export backup
-Import backup
-Data is stored in this browser on this device. Keep a backup before clearing browser data.
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#10131b">
+<title>Roman AI</title>
+<style>
+:root{color-scheme:dark;--bg:#0b0e14;--panel:#151a24;--line:#283142;--text:#f3f5fa;--muted:#9ba7ba;--accent:#8b9cff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px system-ui,-apple-system,sans-serif}
+header{padding:24px 18px 14px;background:#111621;border-bottom:1px solid var(--line)}h1{margin:0;font-size:25px}header p{margin:5px 0 0;color:var(--muted)}
+nav{display:flex;gap:8px;overflow:auto;padding:12px 14px;position:sticky;top:0;background:#0b0e14;z-index:2}
+nav button,.btn{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:12px;padding:10px 13px;font-weight:650}
+nav button.active,.primary{background:var(--accent);color:#10131b;border-color:var(--accent)}
+main{padding:10px 14px 40px;max-width:760px;margin:auto}.view{display:none}.view.active{display:block}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0}
+h2{font-size:20px;margin:0 0 12px}h3{font-size:16px;margin:0 0 8px}
+p,.muted{color:var(--muted);line-height:1.45}label{display:block;margin:12px 0 6px;color:#cbd3e1;font-size:14px}
+input,textarea,select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:#0e131c;color:var(--text);font:inherit}
+textarea{min-height:100px;resize:vertical}.btn{margin-top:12px;cursor:pointer}.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1}
+.item{border-top:1px solid var(--line);padding:12px 0}.item:first-child{border-top:0}.pill{font-size:12px;color:var(--accent)}
+small{color:var(--muted)}.stat{font-size:25px;font-weight:750}.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.stats .card{margin:0}
+</style>
+</head>
+<body>
+<header><h1>ROMAN AI</h1><p>Your semi-autonomous business workspace · You approve important actions.</p></header>
+<nav>
+<button class="active" data-view="home">Overview</button><button data-view="brand">Brand Lab</button><button data-view="sales">Sales Inbox</button><button data-view="prospects">Prospects</button><button data-view="orders">Orders</button>
+</nav>
+<main>
+<section id="home" class="view active">
+<div class="card"><h2>Mission control</h2><p>Plan outreach, organize brand details, draft messages, and track orders. Nothing is sent or charged automatically.</p></div>
+<div class="stats"><div class="card"><small>Prospects</small><div class="stat" id="prospectCount">0</div></div><div class="card"><small>Orders</small><div class="stat" id="orderCount">0</div></div></div>
+<div class="card"><h3>How this version works</h3><p>Brand Lab and Sales Inbox create drafts from information you enter. The Instagram link is stored as a reference only; this app does not fetch or scrape profiles, send DMs, process payments, or connect to a live AI model.</p></div>
+</section>
+<section id="brand" class="view">
+<div class="card"><h2>Brand Lab</h2><p>Enter details the brand owner has shared with you, or details you have permission to use.</p>
+<label>Brand name</label><input id="brandName" placeholder="Example: Northside Clothing">
+<label>Instagram URL (reference only)</label><input id="brandUrl" placeholder="https://instagram.com/brand">
+<label>What do they sell?</label><textarea id="brandProduct" placeholder="Hoodies, tees, streetwear..."></textarea>
+<label>Brand personality</label><select id="brandTone"><option>Professional and catchy</option><option>Bold and energetic</option><option>Minimal and clean</option><option>Friendly and casual</option></select>
+<label>Target customer / extra details</label><textarea id="brandAudience" placeholder="Who they serve, new collection, key message..."></textarea>
+<button class="btn primary" id="analyze">Create brand brief</button><div id="brandResult" class="card" hidden></div>
+</div></section>
+<section id="sales" class="view">
+<div class="card"><h2>Sales Inbox</h2><p>Create a personalized outreach draft. Review it yourself before copying and sending.</p>
+<label>Business name</label><input id="salesName" placeholder="Brand name">
+<label>What caught your attention?</label><textarea id="salesDetail" placeholder="A recent product, collection, or post detail"></textarea>
+<label>Your offer</label><select id="salesOffer"><option>5 custom captions for $10</option><option>10 custom captions for $18</option><option>20 custom captions for $30</option><option>Free sample caption</option></select>
+<button class="btn primary" id="draftSales">Draft message</button><label>Draft — edit before sending</label><textarea id="salesResult" placeholder="Your message will appear here."></textarea>
+<button class="btn" id="copySales">Copy draft</button></div>
+</section>
+<section id="prospects" class="view">
+<div class="card"><h2>Prospect tracker</h2><label>Business / contact name</label><input id="prospectInput" placeholder="Business name"><label>Notes</label><input id="prospectNotes" placeholder="What they sell or why they're a fit"><button class="btn primary" id="addProspect">Save prospect</button><div id="prospectList"></div></div>
+</section>
+<section id="orders" class="view">
+<div class="card"><h2>Order tracker</h2><label>Client / order</label><input id="orderInput" placeholder="Client name and service"><label>Status</label><select id="orderStatus"><option>Pending</option><option>In progress</option><option>Delivered</option><option>Paid</option></select><button class="btn primary" id="addOrder">Save order</button><div id="orderList"></div></div>
+</section>
+<div class="card"><h3>Backup</h3><p>Export or restore this app's saved records on this device.</p><div class="row"><button class="btn" id="exportData">Export backup</button><label class="btn" style="text-align:center">Import backup<input id="importData" type="file" accept="application/json" hidden></label></div><small>Data is stored in this browser on this device. Keep a backup before clearing browser data.</small></div>
+</main>
+<script>
+const KEY='roman-ai-v2';
+const old=localStorage.getItem('roman-ai-v1');
+let data={prospects:[],orders:[]};
+try{const saved=JSON.parse(localStorage.getItem(KEY)||'null');if(saved)data=saved;else if(old){const v=JSON.parse(old);data.prospects=v.prospects||[];data.orders=v.orders||[];}}catch(e){}
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render()}
+function render(){
+document.getElementById('prospectCount').textContent=data.prospects.length;
+document.getElementById('orderCount').textContent=data.orders.length;
+document.getElementById('prospectList').innerHTML=data.prospects.map((x,i)=>`<div class="item"><b>${esc(x.name)}</b><p>${esc(x.notes||'')}</p><button class="btn" onclick="removeItem('prospects',${i})">Delete</button></div>`).join('');
+document.getElementById('orderList').innerHTML=data.orders.map((x,i)=>`<div class="item"><b>${esc(x.name)}</b><p>${esc(x.status)}</p><button class="btn" onclick="removeItem('orders',${i})">Delete</button></div>`).join('');
+}
+function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+window.removeItem=(type,i)=>{data[type].splice(i,1);save()};
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.getElementById(b.dataset.view).classList.add('active')}));
+document.getElementById('analyze').onclick=()=>{const n=document.getElementById('brandName').value.trim(),p=document.getElementById('brandProduct').value.trim(),t=document.getElementById('brandTone').value,a=document.getElementById('brandAudience').value.trim(),u=document.getElementById('brandUrl').value.trim();const r=document.getElementById('brandResult');r.hidden=false;r.innerHTML=`<h3>Brand brief</h3><p><b>${esc(n||'Unnamed brand')}</b></p><p>Products: ${esc(p||'Not provided')}</p><p>Voice: ${esc(t)}</p><p>Audience / notes: ${esc(a||'Not provided')}</p><p>Reference link: ${esc(u||'Not provided')}</p><p class="muted">First-pass organization based only on the details you entered. Verify details with the brand owner.</p>`};
+document.getElementById('draftSales').onclick=()=>{const n=document.getElementById('salesName').value.trim()||'your brand',d=document.getElementById('salesDetail').value.trim(),o=document.getElementById('salesOffer').value;document.getElementById('salesResult').value=`Hey! I came across ${n} and ${d?'noticed '+d:'wanted to learn more about your brand'}. I run Roman Captions and help clothing brands create professional, catchy Instagram captions. I'm currently offering ${o}. I can also create one sample so you can see the style before deciding. Would you be interested?`};
+document.getElementById('copySales').onclick=async()=>{const v=document.getElementById('salesResult').value;if(v)try{await navigator.clipboard.writeText(v);alert('Draft copied. Review it before sending.')}catch(e){alert('Select the draft and copy it manually.')}};
+document.getElementById('addProspect').onclick=()=>{const name=document.getElementById('prospectInput').value.trim();if(!name)return;data.prospects.push({name,notes:document.getElementById('prospectNotes').value});document.getElementById('prospectInput').value='';document.getElementById('prospectNotes').value='';save()};
+document.getElementById('addOrder').onclick=()=>{const name=document.getElementById('orderInput').value.trim();if(!name)return;data.orders.push({name,status:document.getElementById('orderStatus').value});document.getElementById('orderInput').value='';save()};
+document.getElementById('exportData').onclick=()=>{const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='roman-ai-backup.json';a.click();URL.revokeObjectURL(a.href)};
+document.getElementById('importData').onchange=async e=>{try{const f=e.target.files[0];if(!f)return;const v=JSON.parse(await f.text());if(!Array.isArray(v.prospects)||!Array.isArray(v.orders))throw Error();data=v;save();alert('Backup imported.')}catch(err){alert('That backup file could not be read.')}};
+render();
+</script>
+</body></html>
