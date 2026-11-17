@@ -8,7 +8,7 @@ document.getElementById('analyze').onclick=async()=>{
   const r=document.getElementById('brandResult');
 
   r.hidden=false;
-  r.innerHTML='<p>Roman AI is creating your brand brief...</p>';
+  r.innerHTML=`<p>Roman AI is creating your brand brief...</p>`;
 
   const prompt=`Create a useful brand brief using only these details. Do not invent facts. Identify missing information clearly.
 
@@ -40,9 +40,9 @@ Include:
       ?payload.result
       :JSON.stringify(payload.result,null,2);
 
-    r.innerHTML='<h3>AI Brand Brief</h3><pre style="white-space:pre-wrap">'+esc(answer)+'</pre>';
+    r.innerHTML=`<h3>AI Brand Brief</h3><pre style="white-space:pre-wrap">${esc(answer)}</pre>`;
   }catch(error){
-    r.innerHTML='<h3>Connection error</h3><p>'+esc(error.message)+'</p><p>Check the Worker deployment and try again.</p>';
+    r.innerHTML=`<h3>Connection error</h3><p>${esc(error.message)}</p><p>Check the Worker deployment and try again.</p>`;
   }
 };
 document.getElementById('draftSales').onclick=()=>{const n=document.getElementById('salesName').value.trim()||'your brand',d=document.getElementById('salesDetail').value.trim(),o=document.getElementById('salesOffer').value;document.getElementById('salesResult').value=`Hey! I came across ${n} and ${d?'noticed '+d:'wanted to learn more about your brand'}. I run Roman Captions and help clothing brands create professional, catchy Instagram captions. I'm currently offering ${o}. I can also create one sample so you can see the style before deciding. Would you be interested?`};
