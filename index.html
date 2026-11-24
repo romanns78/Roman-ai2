@@ -1,55 +1,1381 @@
-document.getElementById('analyze').onclick=async()=>{
-  const n=document.getElementById('brandName').value.trim();
-  const p=document.getElementById('brandProduct').value.trim();
-  const t=document.getElementById('brandTone').value;
-  const a=document.getElementById('brandAudience').value.trim();
-  const u=document.getElementById('brandUrl').value.trim();
-  const r=document.getElementById('brandResult');
 
-  r.hidden=false;
-  r.innerHTML=`<p>Roman AI is creating your brand brief...</p>`;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0b0e14">
+<title>Roman AI</title>
 
-  const prompt=`Create a useful brand brief using only these details. Do not invent facts. Identify missing information clearly.
+<style>
+:root {
+  --bg:#0b0e14;
+  --panel:#151a24;
+  --panel2:#1c2330;
+  --line:#293344;
+  --text:#f4f5f9;
+  --muted:#929bad;
+  --accent:#8b7cff;
+  --green:#45d6a0;
+  --red:#ff7373;
+}
 
-Brand: ${n||'Not provided'}
-Products: ${p||'Not provided'}
-Personality: ${t}
-Audience and notes: ${a||'Not provided'}
-Reference link: ${u||'Not provided'}
+* {box-sizing:border-box}
 
-Include:
-1. Brand overview
-2. Target audience
-3. Brand voice
-4. Messaging ideas
-5. Suggested content themes
-6. Questions to verify with the brand owner.`;
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
 
-  try{
-    const response=await fetch('https://roman-ai-api.princevalor144.workers.dev/',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({prompt})
-    });
+button,input,textarea,select {font:inherit}
 
-    const payload=await response.json();
-    if(!response.ok) throw new Error(payload.error||payload.message||'AI request failed.');
+button {
+  cursor:pointer;
+  border:0;
+}
 
-    const answer=typeof payload.result==='string'
-      ?payload.result
-      :JSON.stringify(payload.result,null,2);
+.app {
+  display:flex;
+  min-height:100vh;
+}
 
-    r.innerHTML=`<h3>AI Brand Brief</h3><pre style="white-space:pre-wrap">${esc(answer)}</pre>`;
-  }catch(error){
-    r.innerHTML=`<h3>Connection error</h3><p>${esc(error.message)}</p><p>Check the Worker deployment and try again.</p>`;
+.sidebar {
+  width:235px;
+  background:#10141d;
+  border-right:1px solid var(--line);
+  padding:25px 15px;
+  flex-shrink:0;
+}
+
+.logo {
+  font-size:25px;
+  font-weight:850;
+  letter-spacing:-1px;
+  margin:5px 10px;
+}
+
+.logo span {color:var(--accent)}
+
+.tagline {
+  color:var(--muted);
+  font-size:12px;
+  margin:0 10px 35px;
+}
+
+.nav {
+  display:grid;
+  gap:8px;
+}
+
+.nav button {
+  background:transparent;
+  color:var(--muted);
+  text-align:left;
+  padding:14px;
+  border-radius:10px;
+  font-size:14px;
+}
+
+.nav button.active,
+.nav button:hover {
+  background:var(--panel2);
+  color:white;
+}
+
+.main {
+  flex:1;
+  min-width:0;
+  padding:28px;
+  max-width:1400px;
+}
+
+.topbar {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+  margin-bottom:28px;
+}
+
+.topbar h1 {
+  font-size:25px;
+  margin:0;
+}
+
+.status {
+  color:var(--green);
+  font-size:12px;
+  background:#163329;
+  padding:9px 13px;
+  border-radius:30px;
+}
+
+.page {display:none}
+.page.active {display:block}
+
+.welcome {
+  padding:27px;
+  border-radius:17px;
+  background:linear-gradient(120deg,#242044,#171d30);
+  border:1px solid #38335e;
+  margin-bottom:22px;
+}
+
+.welcome h2 {
+  font-size:26px;
+  margin:0 0 10px;
+}
+
+.welcome p {
+  color:#c1c3d4;
+  margin:0;
+  line-height:1.6;
+}
+
+.stats {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:15px;
+  margin-bottom:22px;
+}
+
+.stat,.card {
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:20px;
+  min-width:0;
+}
+
+.stat small {
+  color:var(--muted);
+}
+
+.stat h2 {
+  font-size:29px;
+  margin:12px 0 0;
+}
+
+.card {margin-bottom:18px}
+
+.card h2,.card h3 {
+  margin:0 0 17px;
+}
+
+.card p {
+  color:var(--muted);
+  line-height:1.6;
+}
+
+.grid {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:16px;
+}
+
+.field {margin-bottom:16px}
+
+label {
+  display:block;
+  color:#c9cede;
+  font-size:13px;
+  margin-bottom:8px;
+}
+
+input,textarea,select {
+  width:100%;
+  padding:13px;
+  color:white;
+  background:#0d121b;
+  border:1px solid var(--line);
+  border-radius:9px;
+  outline:none;
+}
+
+input:focus,textarea:focus,select:focus {
+  border-color:var(--accent);
+}
+
+textarea {
+  resize:vertical;
+  min-height:105px;
+}
+
+select option {
+  background:#151a24;
+}
+
+.primary {
+  background:var(--accent);
+  color:white;
+  border-radius:9px;
+  padding:13px 18px;
+  font-weight:700;
+}
+
+.secondary {
+  background:var(--panel2);
+  color:white;
+  border:1px solid var(--line);
+  border-radius:9px;
+  padding:11px 15px;
+}
+
+.danger {
+  color:var(--red);
+  background:#321c25;
+  padding:9px 12px;
+  border-radius:8px;
+}
+
+button:disabled {
+  opacity:.5;
+  cursor:not-allowed;
+}
+
+.result {
+  background:#0d121b;
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:17px;
+  margin-top:17px;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+  line-height:1.7;
+}
+
+.result:empty {display:none}
+
+.result h3 {margin-top:0}
+
+.toolbar {
+  display:flex;
+  flex-wrap:wrap;
+  gap:9px;
+  margin-top:15px;
+}
+
+.item {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  background:#101621;
+  border:1px solid var(--line);
+  padding:15px;
+  border-radius:10px;
+  margin-bottom:10px;
+}
+
+.item p {
+  margin:5px 0 0;
+  font-size:13px;
+}
+
+.item-actions {
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+}
+
+.item-actions button {
+  font-size:12px;
+}
+
+.empty {
+  color:var(--muted);
+  text-align:center;
+  padding:30px;
+}
+
+.small {
+  color:var(--muted);
+  font-size:12px;
+}
+
+.mobile-nav {display:none}
+
+footer {
+  color:var(--muted);
+  font-size:12px;
+  text-align:center;
+  margin:40px 0 15px;
+}
+
+@media(max-width:850px) {
+  .sidebar {width:190px}
+  .main {padding:20px}
+  .stats {grid-template-columns:repeat(2,1fr)}
+}
+
+@media(max-width:600px) {
+  .app {display:block;padding-bottom:75px}
+  .sidebar {display:none}
+  .main {padding:17px}
+  .topbar {margin-bottom:20px}
+  .topbar h1 {font-size:21px}
+  .grid {grid-template-columns:1fr}
+  .stats {gap:10px}
+  .stat {padding:15px}
+  .stat h2 {font-size:24px}
+  .welcome {padding:21px}
+  .mobile-nav {
+    display:flex;
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    z-index:10;
+    background:#10141d;
+    border-top:1px solid var(--line);
+    justify-content:space-around;
+    padding:9px 2px;
   }
+  .mobile-nav button {
+    color:var(--muted);
+    background:none;
+    font-size:10px;
+    padding:7px 3px;
+  }
+  .mobile-nav button.active {color:var(--accent)}
+  .item {align-items:flex-start;flex-direction:column}
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<aside class="sidebar">
+  <div class="logo">ROMAN<span> AI</span></div>
+  <div class="tagline">Your business command center</div>
+
+  <nav class="nav">
+    <button class="active" data-page="overview">⌂ Overview</button>
+    <button data-page="brand">✦ Brand Lab</button>
+    <button data-page="sales">✉ Sales Inbox</button>
+    <button data-page="prospects">◎ Prospects</button>
+    <button data-page="orders">▣ Orders</button>
+    <button data-page="backup">⚙ Backup & Settings</button>
+  </nav>
+</aside>
+
+<main class="main">
+
+<header class="topbar">
+  <h1 id="pageTitle">Overview</h1>
+  <div class="status">● ROMAN AI ONLINE</div>
+</header>
+
+<!-- OVERVIEW -->
+
+<section class="page active" id="overview">
+
+  <div class="welcome">
+    <h2>Welcome to Roman AI.</h2>
+    <p>Your AI-powered business workspace. Create content, develop brands, manage prospects and organize orders in one place.</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <small>Total prospects</small>
+      <h2 id="statProspects">0</h2>
+    </div>
+    <div class="stat">
+      <small>Total orders</small>
+      <h2 id="statOrders">0</h2>
+    </div>
+    <div class="stat">
+      <small>Pending orders</small>
+      <h2 id="statPending">0</h2>
+    </div>
+    <div class="stat">
+      <small>Completed orders</small>
+      <h2 id="statCompleted">0</h2>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h3>✦ Brand Lab</h3>
+      <p>Build brand strategies, generate captions and develop content ideas.</p>
+      <button class="primary" data-go="brand">Open Brand Lab</button>
+    </div>
+
+    <div class="card">
+      <h3>✉ Sales Inbox</h3>
+      <p>Write personalized outreach messages for potential clients.</p>
+      <button class="primary" data-go="sales">Open Sales Inbox</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Recent activity</h3>
+    <div id="recentActivity" class="empty">Your activity will appear here.</div>
+  </div>
+
+</section>
+
+<!-- BRAND LAB -->
+
+<section class="page" id="brand">
+
+  <div class="card">
+    <h2>✦ AI Brand Lab</h2>
+    <p>Give Roman AI information about a brand. It will create a useful strategy without inventing facts.</p>
+
+    <div class="field">
+      <label>Brand name</label>
+      <input id="brandName" placeholder="Example: Roman Clothing">
+    </div>
+
+    <div class="field">
+      <label>Products or services</label>
+      <input id="brandProduct" placeholder="What does the brand sell?">
+    </div>
+
+    <div class="field">
+      <label>Brand personality</label>
+      <select id="brandTone">
+        <option>Professional</option>
+        <option>Luxury</option>
+        <option>Funny and relatable</option>
+        <option>Bold and confident</option>
+        <option>Minimalist</option>
+        <option>Friendly</option>
+        <option>Streetwear</option>
+        <option>Creative</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Target audience and additional details</label>
+      <textarea id="brandAudience" placeholder="Who is the audience? What makes the brand different?"></textarea>
+    </div>
+
+    <div class="field">
+      <label>Reference website or Instagram link (optional)</label>
+      <input id="brandUrl" placeholder="Paste a reference link">
+      <div class="small">The link is included as context. Roman AI does not scrape or access private accounts.</div>
+    </div>
+
+    <div class="field">
+      <label>What should Roman AI create?</label>
+      <select id="brandTask">
+        <option value="brand">Complete brand brief</option>
+        <option value="captions">Instagram captions</option>
+        <option value="ideas">Content ideas</option>
+        <option value="marketing">Marketing strategy</option>
+      </select>
+    </div>
+
+    <button class="primary" id="analyze">Generate with AI ✦</button>
+
+    <div id="brandResult" class="result"></div>
+
+    <div class="toolbar" id="brandTools" hidden>
+      <button class="secondary" id="copyBrand">Copy result</button>
+    </div>
+  </div>
+
+</section>
+
+<!-- SALES INBOX -->
+
+<section class="page" id="sales">
+
+  <div class="card">
+    <h2>✉ Sales Message Generator</h2>
+    <p>Create personalized messages for potential customers.</p>
+
+    <div class="field">
+      <label>Brand or customer name</label>
+      <input id="salesName" placeholder="Example: Fresh Threads">
+    </div>
+
+    <div class="field">
+      <label>Something you noticed about their brand</label>
+      <textarea id="salesDetail" placeholder="Example: They have great clothing but could improve their captions."></textarea>
+    </div>
+
+    <div class="field">
+      <label>Your offer</label>
+      <select id="salesOffer">
+        <option>Affordable Instagram captions</option>
+        <option>A free sample caption</option>
+        <option>A monthly caption package</option>
+        <option>Brand content ideas</option>
+        <option>Custom content writing</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Message style</label>
+      <select id="salesTone">
+        <option>Friendly and professional</option>
+        <option>Casual and conversational</option>
+        <option>Confident and direct</option>
+      </select>
+    </div>
+
+    <button class="primary" id="draftSales">Generate sales message</button>
+
+    <div class="field" style="margin-top:20px">
+      <label>Generated message</label>
+      <textarea id="salesResult" placeholder="Your message will appear here..."></textarea>
+    </div>
+
+    <div class="toolbar">
+      <button class="secondary" id="copySales">Copy message</button>
+      <button class="secondary" id="followUp">Generate follow-up</button>
+    </div>
+  </div>
+
+</section>
+
+<!-- PROSPECTS -->
+
+<section class="page" id="prospects">
+
+  <div class="card">
+    <h2>◎ Prospect Manager</h2>
+    <p>Keep track of people and businesses you may work with.</p>
+
+    <div class="field">
+      <label>Prospect name</label>
+      <input id="prospectInput" placeholder="Business or customer name">
+    </div>
+
+    <div class="field">
+      <label>Notes</label>
+      <textarea id="prospectNotes" placeholder="Contact information, interests or notes"></textarea>
+    </div>
+
+    <button class="primary" id="addProspect">+ Add prospect</button>
+  </div>
+
+  <div class="card">
+    <h3>Your prospects</h3>
+    <div id="prospectList"></div>
+  </div>
+
+</section>
+
+<!-- ORDERS -->
+
+<section class="page" id="orders">
+
+  <div class="card">
+    <h2>▣ Order Manager</h2>
+    <p>Organize your customer orders and their progress.</p>
+
+    <div class="field">
+      <label>Customer or order name</label>
+      <input id="orderInput" placeholder="Customer name">
+    </div>
+
+    <div class="field">
+      <label>Order details</label>
+      <textarea id="orderDetails" placeholder="What did they order?"></textarea>
+    </div>
+
+    <div class="field">
+      <label>Order status</label>
+      <select id="orderStatus">
+        <option>Pending</option>
+        <option>In progress</option>
+        <option>Completed</option>
+      </select>
+    </div>
+
+    <button class="primary" id="addOrder">+ Add order</button>
+  </div>
+
+  <div class="card">
+    <h3>Your orders</h3>
+    <div id="orderList"></div>
+  </div>
+
+</section>
+
+<!-- BACKUP -->
+
+<section class="page" id="backup">
+
+  <div class="card">
+    <h2>⚙ Backup & Settings</h2>
+    <p>Your prospects and orders are saved in this browser on this device.</p>
+
+    <h3>Data backup</h3>
+    <p>Download a backup of your business data or restore a previous backup.</p>
+
+    <div class="toolbar">
+      <button class="primary" id="exportData">Download backup</button>
+      <button class="secondary" id="importButton">Restore backup</button>
+      <input type="file" id="importData" accept=".json,application/json" hidden>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>AI Connection</h3>
+    <p>Roman AI uses your existing Cloudflare Worker to generate AI content.</p>
+    <div id="connectionStatus" class="small">Connection will be checked when you generate content.</div>
+    <button class="secondary" id="testConnection">Test AI connection</button>
+  </div>
+
+  <div class="card">
+    <h3>About Roman AI</h3>
+    <p>Roman AI is an AI-powered business assistant designed to help with brand strategy, content creation, sales organization and customer management.</p>
+    <p class="small">Version 2.0 · Roman AI</p>
+  </div>
+
+</section>
+
+<footer>ROMAN AI · Built for business growth</footer>
+
+</main>
+</div>
+
+<!-- MOBILE NAV -->
+
+<nav class="mobile-nav">
+  <button class="active" data-page="overview">⌂<br>Home</button>
+  <button data-page="brand">✦<br>Brand</button>
+  <button data-page="sales">✉<br>Sales</button>
+  <button data-page="prospects">◎<br>Clients</button>
+  <button data-page="orders">▣<br>Orders</button>
+  <button data-page="backup">⚙<br>Settings</button>
+</nav>
+
+<script>
+
+// ====================================
+// ROMAN AI - MAIN APPLICATION
+// ====================================
+
+const API_URL =
+  "https://roman-ai-api.princevalor144.workers.dev/";
+
+const STORAGE_KEY = "roman-ai-data-v3";
+
+const defaultData = {
+  prospects: [],
+  orders: [],
+  activity: []
 };
-document.getElementById('draftSales').onclick=()=>{const n=document.getElementById('salesName').value.trim()||'your brand',d=document.getElementById('salesDetail').value.trim(),o=document.getElementById('salesOffer').value;document.getElementById('salesResult').value=`Hey! I came across ${n} and ${d?'noticed '+d:'wanted to learn more about your brand'}. I run Roman Captions and help clothing brands create professional, catchy Instagram captions. I'm currently offering ${o}. I can also create one sample so you can see the style before deciding. Would you be interested?`};
-document.getElementById('copySales').onclick=async()=>{const v=document.getElementById('salesResult').value;if(v)try{await navigator.clipboard.writeText(v);alert('Draft copied. Review it before sending.')}catch(e){alert('Select the draft and copy it manually.')}};
-document.getElementById('addProspect').onclick=()=>{const name=document.getElementById('prospectInput').value.trim();if(!name)return;data.prospects.push({name,notes:document.getElementById('prospectNotes').value});document.getElementById('prospectInput').value='';document.getElementById('prospectNotes').value='';save()};
-document.getElementById('addOrder').onclick=()=>{const name=document.getElementById('orderInput').value.trim();if(!name)return;data.orders.push({name,status:document.getElementById('orderStatus').value});document.getElementById('orderInput').value='';save()};
-document.getElementById('exportData').onclick=()=>{const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='roman-ai-backup.json';a.click();URL.revokeObjectURL(a.href)};
-document.getElementById('importData').onchange=async e=>{try{const f=e.target.files[0];if(!f)return;const v=JSON.parse(await f.text());if(!Array.isArray(v.prospects)||!Array.isArray(v.orders))throw Error();data=v;save();alert('Backup imported.')}catch(err){alert('That backup file could not be read.')}};
+
+let data = loadData();
+
+function loadData() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return structuredClone(defaultData);
+
+    const parsed = JSON.parse(saved);
+
+    return {
+      prospects: Array.isArray(parsed.prospects)
+        ? parsed.prospects : [],
+      orders: Array.isArray(parsed.orders)
+        ? parsed.orders : [],
+      activity: Array.isArray(parsed.activity)
+        ? parsed.activity : []
+    };
+  } catch (error) {
+    console.error("Data loading error:", error);
+    return structuredClone(defaultData);
+  }
+}
+
+function save() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    render();
+  } catch (error) {
+    alert("Could not save data. Your browser storage may be full.");
+  }
+}
+
+function esc(value) {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[char]);
+}
+
+function logActivity(message) {
+  data.activity.unshift({
+    message,
+    date: new Date().toLocaleString()
+  });
+
+  data.activity = data.activity.slice(0, 20);
+  save();
+}
+
+// ====================================
+// NAVIGATION
+// ====================================
+
+function openPage(page) {
+  document.querySelectorAll(".page").forEach(el => {
+    el.classList.toggle("active", el.id === page);
+  });
+
+  document.querySelectorAll("[data-page]").forEach(el => {
+    el.classList.toggle("active", el.dataset.page === page);
+  });
+
+  const names = {
+    overview: "Overview",
+    brand: "Brand Lab",
+    sales: "Sales Inbox",
+    prospects: "Prospects",
+    orders: "Orders",
+    backup: "Backup & Settings"
+  };
+
+  document.getElementById("pageTitle").textContent =
+    names[page] || "Roman AI";
+
+  window.scrollTo(0, 0);
+}
+
+document.querySelectorAll("[data-page]").forEach(button => {
+  button.addEventListener("click", () => {
+    openPage(button.dataset.page);
+  });
+});
+
+document.querySelectorAll("[data-go]").forEach(button => {
+  button.addEventListener("click", () => {
+    openPage(button.dataset.go);
+  });
+});
+
+// ====================================
+// AI CONNECTION
+// ====================================
+
+async function askAI(prompt) {
+  const response = await fetch(API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ prompt })
+  });
+
+  let payload;
+
+  try {
+    payload = await response.json();
+  } catch {
+    throw new Error("The AI server returned an invalid response.");
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      payload.error ||
+      payload.message ||
+      "AI request failed."
+    );
+  }
+
+  const answer = typeof payload.result === "string"
+    ? payload.result
+    : JSON.stringify(payload.result, null, 2);
+
+  if (!answer) {
+    throw new Error("The AI returned an empty response.");
+  }
+
+  return answer;
+}
+
+// ====================================
+// BRAND LAB
+// ====================================
+
+const analyzeButton =
+  document.getElementById("analyze");
+
+const brandResult =
+  document.getElementById("brandResult");
+
+analyzeButton.addEventListener("click", async () => {
+
+  const name =
+    document.getElementById("brandName").value.trim();
+
+  const product =
+    document.getElementById("brandProduct").value.trim();
+
+  const tone =
+    document.getElementById("brandTone").value;
+
+  const audience =
+    document.getElementById("brandAudience").value.trim();
+
+  const url =
+    document.getElementById("brandUrl").value.trim();
+
+  const task =
+    document.getElementById("brandTask").value;
+
+  if (!name && !product && !audience) {
+    alert("Enter some brand information first.");
+    return;
+  }
+
+  const tasks = {
+    brand: `
+Create a complete brand brief.
+Include:
+1. Brand overview.
+2. Target audience.
+3. Brand voice.
+4. Messaging ideas.
+5. Content themes.
+6. Questions to verify.
+`,
+    captions: `
+Write 5 original Instagram captions for this brand.
+Make them engaging and match the brand personality.
+Include suitable hashtags.
+`,
+    ideas: `
+Create 15 original social media content ideas.
+Include hooks, formats and explanations.
+`,
+    marketing: `
+Create a practical marketing strategy.
+Include positioning, audience, messaging,
+content strategy and suggested next steps.
+`
+  };
+
+  const prompt = `
+You are Roman AI, a professional brand and marketing assistant.
+
+Use only the supplied information.
+Never invent facts, statistics, testimonials or customer details.
+Clearly identify missing information.
+
+Brand: ${name || "Not provided"}
+Products: ${product || "Not provided"}
+Personality: ${tone}
+Audience: ${audience || "Not provided"}
+Reference link: ${url || "Not provided"}
+
+${tasks[task]}
+
+Make the response organized, practical and useful.
+`;
+
+  analyzeButton.disabled = true;
+  analyzeButton.textContent = "Roman AI is working...";
+
+  brandResult.textContent =
+    "Creating your results. Please wait...";
+
+  try {
+    const answer = await askAI(prompt);
+
+    brandResult.textContent = answer;
+
+    document.getElementById("brandTools").hidden = false;
+
+    logActivity("Generated brand content for " +
+      (name || "a brand"));
+
+  } catch (error) {
+    brandResult.textContent =
+      "CONNECTION ERROR\n\n" +
+      error.message +
+      "\n\nCheck your Cloudflare Worker deployment.";
+
+  } finally {
+    analyzeButton.disabled = false;
+    analyzeButton.textContent = "Generate with AI ✦";
+  }
+});
+
+document.getElementById("copyBrand")
+.addEventListener("click", async () => {
+  await copyText(brandResult.textContent);
+});
+
+// ====================================
+// SALES MESSAGE GENERATOR
+// ====================================
+
+document.getElementById("draftSales")
+.addEventListener("click", () => {
+
+  const name =
+    document.getElementById("salesName").value.trim()
+    || "your brand";
+
+  const detail =
+    document.getElementById("salesDetail").value.trim();
+
+  const offer =
+    document.getElementById("salesOffer").value;
+
+  const tone =
+    document.getElementById("salesTone").value;
+
+  let opening =
+    `Hey! I came across ${name} and `;
+
+  opening += detail
+    ? `noticed ${detail}. `
+    : "wanted to learn more about your brand. ";
+
+  const message =
+    opening +
+    `I run Roman Captions and help brands create professional, engaging Instagram captions. ` +
+    `I'm currently offering ${offer.toLowerCase()}. ` +
+    `I can also create one sample so you can see the style before deciding. ` +
+    `Would you be interested?`;
+
+  const finalMessage =
+    tone === "Confident and direct"
+      ? `Hi! I help brands improve their social media content through professional captions. ${message}`
+      : tone === "Casual and conversational"
+      ? message
+      : `Hello! ${message}`;
+
+  document.getElementById("salesResult").value =
+    finalMessage;
+
+  logActivity("Created a sales message for " + name);
+});
+
+// ====================================
+// SALES FOLLOW-UP
+// ====================================
+
+document.getElementById("followUp")
+.addEventListener("click", () => {
+
+  const name =
+    document.getElementById("salesName").value.trim()
+    || "there";
+
+  document.getElementById("salesResult").value =
+    `Hey ${name}! Just following up on my previous message. ` +
+    `I'd still love to help with your brand's content. ` +
+    `If you're interested, I would be happy to share a sample. ` +
+    `No pressure either way!`;
+});
+
+// ====================================
+// COPY FUNCTION
+// ====================================
+
+async function copyText(value) {
+  if (!value) {
+    alert("There is nothing to copy.");
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(value);
+    alert("Copied successfully!");
+  } catch (error) {
+    alert("Copy unavailable. Select the text and copy it manually.");
+  }
+}
+
+document.getElementById("copySales")
+.addEventListener("click", () => {
+  copyText(
+    document.getElementById("salesResult").value
+  );
+});
+
+// ====================================
+// PROSPECT MANAGER
+// ====================================
+
+document.getElementById("addProspect")
+.addEventListener("click", () => {
+
+  const name =
+    document.getElementById("prospectInput").value.trim();
+
+  const notes =
+    document.getElementById("prospectNotes").value.trim();
+
+  if (!name) {
+    alert("Enter a prospect name.");
+    return;
+  }
+
+  data.prospects.push({
+    id: crypto.randomUUID(),
+    name,
+    notes,
+    status: "New",
+    date: new Date().toLocaleDateString()
+  });
+
+  document.getElementById("prospectInput").value = "";
+  document.getElementById("prospectNotes").value = "";
+
+  logActivity("Added prospect: " + name);
+});
+
+function renderProspects() {
+
+  const container =
+    document.getElementById("prospectList");
+
+  if (!data.prospects.length) {
+    container.innerHTML =
+      '<div class="empty">No prospects yet. Add your first prospect above.</div>';
+    return;
+  }
+
+  container.innerHTML = data.prospects.map(person => `
+    <div class="item">
+      <div>
+        <strong>${esc(person.name)}</strong>
+        <p>${esc(person.notes)}</p>
+        <p>Status: ${esc(person.status)}</p>
+        <p class="small">${esc(person.date)}</p>
+      </div>
+
+      <div class="item-actions">
+        <button class="secondary"
+          data-prospect-status="${esc(person.id)}">
+          Change status
+        </button>
+
+        <button class="danger"
+          data-delete-prospect="${esc(person.id)}">
+          Delete
+        </button>
+      </div>
+    </div>
+  `).join("");
+}
+
+document.getElementById("prospectList")
+.addEventListener("click", event => {
+
+  const statusButton =
+    event.target.closest("[data-prospect-status]");
+
+  const deleteButton =
+    event.target.closest("[data-delete-prospect]");
+
+  if (statusButton) {
+    const person = data.prospects.find(
+      item => item.id === statusButton.dataset.prospectStatus
+    );
+
+    if (!person) return;
+
+    const statuses = [
+      "New",
+      "Contacted",
+      "Interested",
+      "Client"
+    ];
+
+    const current = statuses.indexOf(person.status);
+
+    person.status = statuses[
+      (current + 1) % statuses.length
+    ];
+
+    save();
+  }
+
+  if (deleteButton) {
+    if (!confirm("Delete this prospect?")) return;
+
+    data.prospects = data.prospects.filter(
+      item => item.id !== deleteButton.dataset.deleteProspect
+    );
+
+    save();
+  }
+});
+
+// ====================================
+// ORDER MANAGER
+// ====================================
+
+document.getElementById("addOrder")
+.addEventListener("click", () => {
+
+  const name =
+    document.getElementById("orderInput").value.trim();
+
+  const details =
+    document.getElementById("orderDetails").value.trim();
+
+  const status =
+    document.getElementById("orderStatus").value;
+
+  if (!name) {
+    alert("Enter a customer or order name.");
+    return;
+  }
+
+  data.orders.push({
+    id: crypto.randomUUID(),
+    name,
+    details,
+    status,
+    date: new Date().toLocaleDateString()
+  });
+
+  document.getElementById("orderInput").value = "";
+  document.getElementById("orderDetails").value = "";
+
+  logActivity("Added order: " + name);
+});
+
+function renderOrders() {
+
+  const container =
+    document.getElementById("orderList");
+
+  if (!data.orders.length) {
+    container.innerHTML =
+      '<div class="empty">No orders yet.</div>';
+    return;
+  }
+
+  container.innerHTML = data.orders.map(order => `
+    <div class="item">
+      <div>
+        <strong>${esc(order.name)}</strong>
+        <p>${esc(order.details)}</p>
+        <p>Status: ${esc(order.status)}</p>
+        <p class="small">${esc(order.date)}</p>
+      </div>
+
+      <div class="item-actions">
+        <button class="secondary"
+          data-order-status="${esc(order.id)}">
+          Update status
+        </button>
+
+        <button class="danger"
+          data-delete-order="${esc(order.id)}">
+          Delete
+        </button>
+      </div>
+    </div>
+  `).join("");
+}
+
+document.getElementById("orderList")
+.addEventListener("click", event => {
+
+  const statusButton =
+    event.target.closest("[data-order-status]");
+
+  const deleteButton =
+    event.target.closest("[data-delete-order]");
+
+  if (statusButton) {
+    const order = data.orders.find(
+      item => item.id === statusButton.dataset.orderStatus
+    );
+
+    if (!order) return;
+
+    const statuses = [
+      "Pending",
+      "In progress",
+      "Completed"
+    ];
+
+    const current = statuses.indexOf(order.status);
+
+    order.status = statuses[
+      (current + 1) % statuses.length
+    ];
+
+    save();
+  }
+
+  if (deleteButton) {
+    if (!confirm("Delete this order?")) return;
+
+    data.orders = data.orders.filter(
+      item => item.id !== deleteButton.dataset.deleteOrder
+    );
+
+    save();
+  }
+});
+
+// ====================================
+// BACKUP AND RESTORE
+// ====================================
+
+document.getElementById("exportData")
+.addEventListener("click", () => {
+
+  const blob = new Blob(
+    [JSON.stringify(data, null, 2)],
+    {type:"application/json"}
+  );
+
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = "roman-ai-backup.json";
+
+  link.click();
+
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById("importButton")
+.addEventListener("click", () => {
+  document.getElementById("importData").click();
+});
+
+document.getElementById("importData")
+.addEventListener("change", async event => {
+
+  const file = event.target.files[0];
+
+  if (!file) return;
+
+  try {
+    const imported = JSON.parse(await file.text());
+
+    if (
+      !imported ||
+      !Array.isArray(imported.prospects) ||
+      !Array.isArray(imported.orders)
+    ) {
+      throw new Error("Invalid backup");
+    }
+
+    data = {
+      prospects: imported.prospects,
+      orders: imported.orders,
+      activity: Array.isArray(imported.activity)
+        ? imported.activity : []
+    };
+
+    save();
+
+    alert("Roman AI backup restored successfully!");
+
+  } catch (error) {
+    alert("The backup file could not be read.");
+  }
+
+  event.target.value = "";
+});
+
+// ====================================
+// CONNECTION TEST
+// ====================================
+
+document.getElementById("testConnection")
+.addEventListener("click", async () => {
+
+  const button =
+    document.getElementById("testConnection");
+
+  const status =
+    document.getElementById("connectionStatus");
+
+  button.disabled = true;
+  button.textContent = "Testing...";
+
+  status.textContent = "Contacting Roman AI server...";
+
+  try {
+    const answer = await askAI(
+      "Reply with exactly: Roman AI connection successful."
+    );
+
+    status.textContent = "Server response: " + answer;
+
+  } catch (error) {
+    status.textContent = "Connection failed: " + error.message;
+
+  } finally {
+    button.disabled = false;
+    button.textContent = "Test AI connection";
+  }
+});
+
+// ====================================
+// DASHBOARD RENDERING
+// ====================================
+
+function render() {
+
+  document.getElementById("statProspects").textContent =
+    data.prospects.length;
+
+  document.getElementById("statOrders").textContent =
+    data.orders.length;
+
+  document.getElementById("statPending").textContent =
+    data.orders.filter(
+      order => order.status === "Pending"
+    ).length;
+
+  document.getElementById("statCompleted").textContent =
+    data.orders.filter(
+      order => order.status === "Completed"
+    ).length;
+
+  renderProspects();
+  renderOrders();
+
+  const recent =
+    document.getElementById("recentActivity");
+
+  if (!data.activity.length) {
+    recent.innerHTML =
+      "Your activity will appear here.";
+  } else {
+    recent.innerHTML = data.activity.slice(0, 6)
+      .map(item => `
+        <div class="item">
+          <div>
+            ${esc(item.message)}
+            <p class="small">${esc(item.date)}</p>
+          </div>
+        </div>
+      `).join("");
+  }
+}
+
+// ====================================
+// START APPLICATION
+// ====================================
+
 render();
+
+console.log("Roman AI successfully initialized.");
+
 </script>
-</body></html>
+
+</body>
+</html>
