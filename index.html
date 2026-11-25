@@ -788,9 +788,11 @@ async function askAI(prompt) {
     );
   }
 
-  const answer = typeof payload.result === "string"
+  const answer = typeof payload.response === "string"
+    ? payload.response
+    : typeof payload.result === "string"
     ? payload.result
-    : JSON.stringify(payload.result, null, 2);
+    : JSON.stringify(payload, null, 2);
 
   if (!answer) {
     throw new Error("The AI returned an empty response.");
