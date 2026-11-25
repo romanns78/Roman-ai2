@@ -465,12 +465,51 @@ footer {
     <div class="field">
       <label>What should Roman AI create?</label>
       <select id="brandTask">
-        <option value="brand">Complete brand brief</option>
-        <option value="captions">Instagram captions</option>
-        <option value="ideas">Content ideas</option>
-        <option value="marketing">Marketing strategy</option>
-      </select>
-    </div>
+  <option value="brand">Complete brand brief</option>
+  <option value="captions">Caption Engine</option>
+  <option value="ideas">Content ideas</option>
+  <option value="marketing">Marketing strategy</option>
+</select>
+
+<div class="field">
+  <label>Social media platform</label>
+  <select id="captionPlatform">
+    <option>Instagram</option>
+    <option>TikTok</option>
+    <option>Facebook</option>
+  </select>
+</div>
+
+<div class="field">
+  <label>Content type</label>
+  <select id="captionType">
+    <option>Product promotion</option>
+    <option>Product launch</option>
+    <option>Sale or discount</option>
+    <option>Lifestyle post</option>
+    <option>Brand awareness</option>
+  </select>
+</div>
+
+<div class="field">
+  <label>Caption style</label>
+  <select id="captionStyle">
+    <option>Bold and confident</option>
+    <option>Funny and relatable</option>
+    <option>Luxury and sophisticated</option>
+    <option>Professional</option>
+    <option>Friendly and conversational</option>
+  </select>
+</div>
+
+<div class="field">
+  <label>How many captions?</label>
+  <select id="captionCount">
+    <option value="3">3 captions</option>
+    <option value="5" selected>5 captions</option>
+    <option value="10">10 captions</option>
+  </select>
+</div>
 
     <button class="primary" id="analyze">Generate with AI ✦</button>
 
@@ -848,9 +887,20 @@ Include:
 6. Questions to verify.
 `,
     captions: `
-Write 5 original Instagram captions for this brand.
-Make them engaging and match the brand personality.
-Include suitable hashtags.
+Create ${document.getElementById("captionCount").value} original captions.
+
+Platform: ${document.getElementById("captionPlatform").value}
+Content type: ${document.getElementById("captionType").value}
+Caption style: ${document.getElementById("captionStyle").value}
+
+For each caption include:
+1. An attention-grabbing opening hook.
+2. An engaging caption.
+3. A natural call to action.
+4. Relevant hashtags.
+
+Make every caption original, specific and ready to publish.
+Do not invent product details or brand claims.
 `,
     ideas: `
 Create 15 original social media content ideas.
